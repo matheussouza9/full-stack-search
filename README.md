@@ -88,9 +88,11 @@ For larger or more time-intensive changes, you're welcome to outline your ideas 
 
 ### Write-up
 
-<!-- Write-up/conclusion section -->
+MongoDB does not provide performant partial text search native capabilities for local/self-hosted deployments. Creating [Text Indexes](https://www.mongodb.com/docs/manual/core/link-text-indexes/) could be an option, but it does not perform partial text search by default. Only exact matches are returned. So, to perform partial-text searches using text indexes, a way could be to create ngrams with all possible lenght combinations of the search terms and then index them all. Also, for each new data entry or update, your ngrams would need to be recomputed and indexed. This solution would require a lot of development time due to its complexity and would likely be hard to maintain in the long run.
 
-_When all the behaviour is implemented, feel free to add some observations or conclusions you like to share in the section_
+Another solution could be using [Query $regex](https://www.mongodb.com/docs/manual/reference/operator/query/regex/), but it does not follow text indexes. It's definetly not performant for large datasets.
+
+The optimal (MongoDB-based) solution is to use [Atlas Search](https://www.mongodb.com/docs/atlas/atlas-search). It's a full-text search & vector-search capability, specifically designed for this purpose. However, it's only available for [Mongo Atlas, the MongoDB Cloud Infrastructure](https://www.mongodb.com/products/platform/atlas-database).
 
 ### Database structure
 
