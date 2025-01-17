@@ -94,6 +94,9 @@ Another solution could be using [Query $regex](https://www.mongodb.com/docs/manu
 
 The optimal (MongoDB-based) solution is to use [Atlas Search](https://www.mongodb.com/docs/atlas/atlas-search). It's a full-text search & vector-search capability, specifically designed for this purpose. However, it's only available for [Mongo Atlas, the MongoDB Cloud Infrastructure](https://www.mongodb.com/products/platform/atlas-database).
 
+#### Personal Experience
+I tried to use the [MongoDB Atlas Local Docker Image](https://hub.docker.com/r/mongodb/mongodb-atlas-local), but I couldn't make it work.
+
 ### Database structure
 
 #### Hotels Collection
