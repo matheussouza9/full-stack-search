@@ -134,7 +134,7 @@ The optimal (MongoDB-based) solution is to use [Atlas Search](https://www.mongod
 ```json
 [
   {
-    "country": "Belgium",
+    "name": "Belgium",
     "countryisocode": "BE"
   },
   {
