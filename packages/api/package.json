@@ -9,7 +9,7 @@
     "dev:no-watch": "tsx .",
     "build": "tsc",
     "build:api": "npm run build",
-    "seedDB": "tsx ./db/seedDB.ts --reset"
+    "seed-db": "tsx ./db/seedDB.ts --reset"
   },
   "keywords": [],
   "author": "",

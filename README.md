@@ -56,6 +56,13 @@ The UI should start at http://localhost:3000
 
 In the `./packages/api` folder, create a `.env` file (or rename the existing `.env.sample`) and fill in the environment variables.
 
+The `DATABASE_URL` should point to your [MongoDB Atlas cluster](https://www.mongodb.com/products/platform/atlas-database). Regular MongoDB instances don't support Search Indexes. More details on the [Write-up](#write-up) section.
+
+To seed your database with the initial data and create the needed search indexes, run
+```
+$ npm run api:seed-db
+```
+
 ## Task at hand
 
 When the project is up and running, you should see a search-bar on the screen. This one is currently hooked up to the `/hotels` endpoint.
