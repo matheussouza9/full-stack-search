@@ -1,26 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getCodeSandboxHost } from "@codesandbox/utils";
+import { Link } from "react-router";
 
-type Hotel = { _id: string, chain_name: string; hotel_name: string; city: string, country: string };
-type City = { _id: string; name: string };
-type Country = { _id: string; name: string };
+import { City, Country, Hotel } from '../../types';
+import { fetchAccomodationsData } from '../../api';
 
-type AccommodationResult = {
-  hotels: Hotel[];
-  cities: City[];
-  countries: Country[];
-}
-
-const codeSandboxHost = getCodeSandboxHost(3001)
-const API_URL = codeSandboxHost ? `https://${codeSandboxHost}` : 'http://localhost:3001'
-
-const fetchAccomodationsData = async (value: string) => {
-  const data = await fetch(`${API_URL}/search?term=${value}`);
-  const accomodationResult = (await data.json()) as AccommodationResult;
-  return accomodationResult;
-}
-
-function App() {
+function HomePage() {
   const [search, setSearch] = useState('');
   const [showClearBtn, setShowClearBtn] = useState(false);
 
@@ -46,6 +30,8 @@ function App() {
       setHotels(accomodationData.hotels);
       setCities(accomodationData.cities);
       setCountries(accomodationData.countries);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoadingData(false);
     }
@@ -71,7 +57,7 @@ function App() {
                   onChange={e => setSearch(e.target.value)}
                 />
                 {showClearBtn && (
-                  <span className="left-pan pe-auto" onClick={() => setSearch('')}>
+                  <span className="left-pan pe-auto close-button" onClick={() => setSearch('')}>
                     <i className="fa fa-close"></i>
                   </span>
                 )}
@@ -81,10 +67,10 @@ function App() {
                   <h2>Hotels</h2>
                   {hotels.length ? hotels.map((hotel, index) => (
                     <li key={index}>
-                      <a href={`/hotels/${hotel._id}`} className="dropdown-item">
+                      <Link to={`/hotels/${hotel._id}`} className="dropdown-item">
                         <i className="fa fa-building mr-2"></i>
                         {hotel.hotel_name}
-                      </a>
+                      </Link>
                       <hr className="divider" />
                     </li>
                   )) : <p>No hotels matched</p>}
@@ -92,10 +78,10 @@ function App() {
                   <h2>Countries</h2>
                   {countries.length ? countries.map((country, index) => (
                     <li key={index}>
-                      <a href={`/country/${country._id}`} className="dropdown-item">
+                      <Link to={`/countries/${country._id}`} className="dropdown-item">
                         <i className="fa fa-flag mr-2"></i>
                         {country.name}
-                      </a>
+                      </Link>
                       <hr className="divider" />
                     </li>
                   )) : <p>No countries matched</p>}
@@ -103,10 +89,10 @@ function App() {
                   <h2>Cities</h2>
                   {cities.length ? cities.map((city, index) => (
                     <li key={index}>
-                      <a href={`/city/${city._id}`} className="dropdown-item">
+                      <Link to={`/cities/${city._id}`} className="dropdown-item">
                         <i className="fa fa-map-marker mr-2"></i>
                         {city.name}
-                      </a>
+                      </Link>
                       <hr className="divider" />
                     </li>
                   )) : <p>No cities matched</p>}
@@ -120,4 +106,4 @@ function App() {
   );
 }
 
-export default App;
+export default HomePage;
