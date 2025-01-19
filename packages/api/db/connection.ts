@@ -12,6 +12,7 @@ async function getDB() {
   if (!mongoClientInstance) {
     mongoClientInstance = await MongoClient.connect(DATABASE_URL, {
       maxPoolSize: 5,
+      maxIdleTimeMS: 30000,
     });
   }
 
