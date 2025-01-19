@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 import joi from 'joi';
 import {
@@ -145,6 +145,118 @@ app.get(
         cities: cities_result,
         countries: countries_result,
       });
+    } finally {
+      await mongoClient.close();
+    }
+  },
+);
+
+const hotelsParamsSchema = joi.object({
+  id: joi.string().hex().length(24).required(),
+});
+
+app.get(
+  '/hotels/:id',
+  validator.params(hotelsParamsSchema),
+  async (req, res) => {
+    const mongoClient = new MongoClient(DATABASE_URL);
+    try {
+      await mongoClient.connect();
+      const db = mongoClient.db();
+
+      const id = new ObjectId(req.params.id);
+      const hotel = await db.collection('hotels').findOne(id);
+
+      if (!hotel) {
+        res.status(404).send();
+        return;
+      }
+
+      res.send(hotel);
+    } finally {
+      await mongoClient.close();
+    }
+  },
+);
+
+const cityParamsSchema = joi.object({
+  id: joi.string().hex().length(24).required(),
+});
+
+app.get('/cities/:id', validator.params(cityParamsSchema), async (req, res) => {
+  const mongoClient = new MongoClient(DATABASE_URL);
+  try {
+    await mongoClient.connect();
+    const db = mongoClient.db();
+
+    const id = new ObjectId(req.params.id);
+    const city = await db.collection('cities').findOne(id);
+
+    if (!city) {
+      res.status(404).send();
+      return;
+    }
+
+    const hotels_agg = [
+      {
+        $search: {
+          text: {
+            query: city.name,
+            path: 'city',
+          },
+        },
+      },
+    ];
+
+    const hotels = await db
+      .collection('hotels')
+      .aggregate(hotels_agg)
+      .toArray();
+
+    res.send({ ...city, hotels });
+  } finally {
+    await mongoClient.close();
+  }
+});
+
+const countryParamsSchema = joi.object({
+  id: joi.string().hex().length(24).required(),
+});
+
+app.get(
+  '/countries/:id',
+  validator.params(countryParamsSchema),
+  async (req, res) => {
+    const mongoClient = new MongoClient(DATABASE_URL);
+    try {
+      await mongoClient.connect();
+      const db = mongoClient.db();
+
+      const id = new ObjectId(req.params.id);
+      const country = await db.collection('countries').findOne(id);
+
+      if (!country) {
+        res.status(404).send();
+        return;
+      }
+
+      const hotels_agg = [
+        {
+          $search: {
+            text: {
+              query: country.name,
+              path: 'country',
+            },
+          },
+        },
+      ];
+
+      const hotels = await db
+        .collection('hotels')
+        .aggregate(hotels_agg)
+        .toArray();
+
+      res.send({ ...country, hotels });
     } finally {
       await mongoClient.close();
     }
