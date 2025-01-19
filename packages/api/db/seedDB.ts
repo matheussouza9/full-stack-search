@@ -1,21 +1,13 @@
-import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
+import { getDB } from './connection';
 
 import { cities as cities_data } from 'db/seeds/cities.js';
 import { countries as countries_data } from './seeds/countries';
 import { hotels as hotels_data } from './seeds/hotels';
 
-dotenv.config();
-
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) throw new Error('DATABASE_URL is not set');
-
 const resetDB = process.argv.includes('--reset');
 
-const client = new MongoClient(DATABASE_URL);
 try {
-  await client.connect();
-  const db = client.db();
+  const db = await getDB();
 
   if (resetDB) {
     await db.dropCollection('cities');
@@ -115,6 +107,4 @@ try {
   });
 } catch (error) {
   console.error('Error seeding database:', error);
-} finally {
-  await client.close();
 }

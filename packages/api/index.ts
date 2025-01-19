@@ -2,7 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
-import { MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
+
+import { getDB } from './db/connection';
 
 import joi from 'joi';
 import {
@@ -13,9 +15,6 @@ import {
 } from 'express-joi-validation';
 
 dotenv.config();
-
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
-const DATABASE_URL = process.env.DATABASE_URL;
 
 const app = express();
 const validator = createValidator();
@@ -37,10 +36,8 @@ app.get(
   '/search',
   validator.query(searchQuerySchema),
   async (req: ValidatedRequest<SearchRequestSchema>, res) => {
-    const mongoClient = new MongoClient(DATABASE_URL);
     try {
-      await mongoClient.connect();
-      const db = mongoClient.db();
+      const db = await getDB();
 
       const term = req.query.term;
 
@@ -145,8 +142,9 @@ app.get(
         cities: cities_result,
         countries: countries_result,
       });
-    } finally {
-      await mongoClient.close();
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
     }
   },
 );
@@ -159,12 +157,10 @@ app.get(
   '/hotels/:id',
   validator.params(hotelsParamsSchema),
   async (req, res) => {
-    const mongoClient = new MongoClient(DATABASE_URL);
     try {
-      await mongoClient.connect();
-      const db = mongoClient.db();
-
       const id = new ObjectId(req.params.id);
+
+      const db = await getDB();
       const hotel = await db.collection('hotels').findOne(id);
 
       if (!hotel) {
@@ -173,8 +169,9 @@ app.get(
       }
 
       res.send(hotel);
-    } finally {
-      await mongoClient.close();
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
     }
   },
 );
@@ -184,12 +181,10 @@ const cityParamsSchema = joi.object({
 });
 
 app.get('/cities/:id', validator.params(cityParamsSchema), async (req, res) => {
-  const mongoClient = new MongoClient(DATABASE_URL);
   try {
-    await mongoClient.connect();
-    const db = mongoClient.db();
-
     const id = new ObjectId(req.params.id);
+
+    const db = await getDB();
     const city = await db.collection('cities').findOne(id);
 
     if (!city) {
@@ -214,8 +209,9 @@ app.get('/cities/:id', validator.params(cityParamsSchema), async (req, res) => {
       .toArray();
 
     res.send({ ...city, hotels });
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
   }
 });
 
@@ -227,12 +223,10 @@ app.get(
   '/countries/:id',
   validator.params(countryParamsSchema),
   async (req, res) => {
-    const mongoClient = new MongoClient(DATABASE_URL);
     try {
-      await mongoClient.connect();
-      const db = mongoClient.db();
-
       const id = new ObjectId(req.params.id);
+
+      const db = await getDB();
       const country = await db.collection('countries').findOne(id);
 
       if (!country) {
@@ -257,8 +251,9 @@ app.get(
         .toArray();
 
       res.send({ ...country, hotels });
-    } finally {
-      await mongoClient.close();
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
     }
   },
 );
