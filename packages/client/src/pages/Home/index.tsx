@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from "react-router";
+import { useDebounce } from 'react-use';
 
 import { City, Country, Hotel } from '../../types';
 import { fetchAccomodationsData } from '../../api';
 
 function HomePage() {
   const [search, setSearch] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState('');
+  const [controller, setController] = useState<AbortController | null>(null);
+
   const [showClearBtn, setShowClearBtn] = useState(false);
 
   const [loadingData, setLoadingData] = useState(false);
@@ -14,7 +18,15 @@ function HomePage() {
   const [cities, setCities] = useState<City[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
 
+  useDebounce(() => {
+    setDebouncedValue(search);
+  }, 250, [search]);
+
   const fetchData = async (term: string) => {
+    if (controller) {
+      controller.abort();
+    }
+
     if (term.length < 3) {
       setHotels([]);
       setCities([]);
@@ -24,13 +36,20 @@ function HomePage() {
     }
 
     try {
+      const newController = new AbortController();
+      setController(newController);
+
       setLoadingData(true);
-      const accomodationData = await fetchAccomodationsData(term);
+
+      const accomodationData = await fetchAccomodationsData(term, { signal: newController.signal });
+
       setShowClearBtn(true);
       setHotels(accomodationData.hotels);
       setCities(accomodationData.cities);
       setCountries(accomodationData.countries);
     } catch (error) {
+      if (error?.name === 'AbortError') return;
+
       console.error(error);
     } finally {
       setLoadingData(false);
@@ -38,8 +57,8 @@ function HomePage() {
   };
 
   useEffect(() => {
-    fetchData(search);
-  }, [search]);
+    fetchData(debouncedValue);
+  }, [debouncedValue]);
 
   return (
     <div className="App">

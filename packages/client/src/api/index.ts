@@ -16,9 +16,15 @@ const API_URL = codeSandboxHost
 
 // TODO Improve error handling for all fetch requests
 
-export const fetchAccomodationsData = async (searchTerm: string) => {
+export const fetchAccomodationsData = async (
+  searchTerm: string,
+  fetchProps?: RequestInit,
+) => {
   try {
-    const response = await fetch(`${API_URL}/search?term=${searchTerm}`);
+    const response = await fetch(
+      `${API_URL}/search?term=${searchTerm}`,
+      fetchProps,
+    );
     if (response.ok) {
       const accomodationResponse =
         (await response.json()) as AccommodationsResponse;
